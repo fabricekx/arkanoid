@@ -1,0 +1,11 @@
+1. ajout du son sur les briques
+const brickHitSound = new Audio("sounds/brick-hit.wav");
+brickHitSound.volume = 0.4;
+ 2. Créer une fonction playSond(sound)
+
+ 3. Appeler cette fonction là où c'est nécessaire.
+
+ 4. Amélioration : créer des strong sur les briques
+
+ 5. Créer une fonction victoire
+ 
