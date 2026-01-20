@@ -10,18 +10,15 @@ function resizeCanvas() {
 
   canvas.width = window.innerWidth * 0.8; // pour le canvas
   canvas.height = window.innerHeight * 0.8;
+
+  // // repositionner le paddle au bas du canvas
+  // paddle.y = canvas.height - paddle.height - 8; // 8px de marge
+  // paddle.x = Math.min(paddle.x, canvas.width - paddle.width); // éviter de sortir du canvas
   
 
 }
 
-const isMobile = window.innerWidth < 768; // true ou false
-if (isMobile) {
-  // afficher les boutons et activer les touches tactiles
-  document.getElementById("mobile-controls").style.display = "flex";
-} else {
-  // cacher les contrôles mobiles
-  document.getElementById("mobile-controls").style.display = "none";
-}
+
 
 console.log(window.innerWidth);
 window.addEventListener("resize", resizeCanvas); // on appelle la fonction, on ne l'exécute pas
@@ -34,17 +31,36 @@ resizeCanvas();
 // Variables globale////
 let score = 0;
 let stickyBallActive = false;
-
+const paddle = {
+  width: canvas.width / 10, // a rendre responsive
+  height: 12,
+  x: canvas.width / 2 - 40,
+  y: canvas.height - 20,
+  speed: 8,
+};
+const isMobile = window.innerWidth < 768; // true ou false
+if (isMobile) {
+  // afficher les boutons et activer les touches tactiles
+  document.getElementById("mobile-controls").style.display = "flex";
+  paddle.y = canvas.height - paddle.height - 10; // léger offset
+  paddle.width = canvas.width / 8; // plus large sur mobile
+} else {
+  // cacher les contrôles mobiles
+  document.getElementById("mobile-controls").style.display = "none";
+}
 //// Instructions////
 const instructions = document.getElementById("game-instructions");
-
+if(isMobile) instructions.style.display="none";
 // On pause le jeu au départ
 let pause = true;
 
 instructions.addEventListener("click", () => {
   pause = false; // reprend le jeu
   instructions.style.display = "none"; // masque l'overlay
+  
 });
+
+
 
 /////////////
 
@@ -220,6 +236,7 @@ class Bonus {
   }
 }
 
+
 /////////////////////////////////// Étape 2 — La balle/////////////////////////////////////
 // Modélisation
 /*const ball = {
@@ -305,13 +322,9 @@ function wallCollision() {
 }
 
 //////////////////   Étape 4 — La raquette ///////////////////////////////
-const paddle = {
-  width: canvas.width / 10, // a rendre responsive
-  height: 12,
-  x: canvas.width / 2 - 40,
-  y: canvas.height - 20,
-  speed: 8,
-};
+
+
+
 
 function drawPaddle() {
   ctx.save();
@@ -400,6 +413,18 @@ canvas.addEventListener("touchmove", e => {
   if (paddle.x < 0) paddle.x = 0;
   if (paddle.x + paddle.width > canvas.width)
     paddle.x = canvas.width - paddle.width;
+});
+
+canvas.addEventListener("click",e => {
+  e.preventDefault();
+  // on relache toutes les balls
+   balls.forEach((ball) => {
+        if (ball.stuck) {
+          ball.stuck = false;
+          ball.vx = 3 * (Math.random() > 0.5 ? 1 : -1);
+          ball.vy = -3;
+        }
+})
 });
 
 
@@ -673,6 +698,10 @@ function pauseGame() {
     ctx.font = "30px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("PAUSE", canvas.width / 2, canvas.height / 2);
+        ctx.font = "12px sans-serif";
+          ctx.fillText("presse SPACE or click PAUSE", canvas.width / 2 , canvas.height / 2 +20);
+  
+
   }
 }
 
@@ -772,7 +801,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 document.getElementById("next-level-btn").addEventListener("click", () => {
-  if (victory()) nextLevel();
+  if (checkVictory()) nextLevel();
 });
 
 ////// Victoire /////////////////
@@ -799,7 +828,7 @@ function drawVictory() {
   ctx.fillText("VICTORY!!!", canvas.width / 2, canvas.height / 2);
   ctx.font = "20px sans-serif";
   ctx.fillText(
-    "Press Enter to next Level",
+    "Press Enter or Next",
     canvas.width / 2,
     canvas.height / 2 + 40,
   );
