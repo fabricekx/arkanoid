@@ -43,7 +43,7 @@ if (isMobile) {
   // afficher les boutons et activer les touches tactiles
   document.getElementById("mobile-controls").style.display = "flex";
   paddle.y = canvas.height - paddle.height - 10; // léger offset
-  paddle.width = canvas.width / 8; // plus large sur mobile
+  paddle.width = canvas.width / 7; // plus large sur mobile
 } else {
   // cacher les contrôles mobiles
   document.getElementById("mobile-controls").style.display = "none";
@@ -268,7 +268,17 @@ function createBall() {
 function drawBalls() {
   balls.forEach((ball) => {
     if (!ball.alive) return;
+if(ball.power) {
+  ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = "gold";
+    ctx.shadowColor = "red";
+    ctx.shadowBlur = 10;
 
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+} else {
     ctx.save();
     ctx.beginPath();
     ctx.fillStyle = "white";
@@ -278,6 +288,7 @@ function drawBalls() {
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
+}
   });
 }
 
