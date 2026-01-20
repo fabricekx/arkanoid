@@ -10,6 +10,17 @@ function resizeCanvas() {
 
   canvas.width = window.innerWidth * 0.8; // pour le canvas
   canvas.height = window.innerHeight * 0.8;
+  
+
+}
+
+const isMobile = window.innerWidth < 768; // true ou false
+if (isMobile) {
+  // afficher les boutons et activer les touches tactiles
+  document.getElementById("mobile-controls").style.display = "flex";
+} else {
+  // cacher les contrôles mobiles
+  document.getElementById("mobile-controls").style.display = "none";
 }
 
 console.log(window.innerWidth);
@@ -23,6 +34,19 @@ resizeCanvas();
 // Variables globale////
 let score = 0;
 let stickyBallActive = false;
+
+//// Instructions////
+const instructions = document.getElementById("game-instructions");
+
+// On pause le jeu au départ
+let pause = true;
+
+instructions.addEventListener("click", () => {
+  pause = false; // reprend le jeu
+  instructions.style.display = "none"; // masque l'overlay
+});
+
+/////////////
 
 //// LEVELS ////
 
@@ -303,7 +327,6 @@ function drawPaddle() {
 ///////// Étape 5 — Contrôle clavier / souris //////////////////
 let right = false;
 let left = false;
-let pause = false;
 
 window.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
@@ -366,6 +389,19 @@ function updatePaddle() {
     paddle.x -= paddle.speed;
   }
 }
+
+/////////// En MOBILE //////
+canvas.addEventListener("touchmove", e => {
+  e.preventDefault();
+  const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+  paddle.x = touchX - paddle.width / 2;
+
+  // limiter aux bords
+  if (paddle.x < 0) paddle.x = 0;
+  if (paddle.x + paddle.width > canvas.width)
+    paddle.x = canvas.width - paddle.width;
+});
+
 
 ////////////////////  Étape 6 — Collision balle / raquette /////////////////////////
 
@@ -729,6 +765,14 @@ window.addEventListener("keydown", (e) => {
     resetBallAndPaddle();
     pause = false;
   }
+});
+ //// Pour MOBILE ////////////
+ document.getElementById("pause-btn").addEventListener("click", () => {
+  pause = !pause;
+});
+
+document.getElementById("next-level-btn").addEventListener("click", () => {
+  if (victory()) nextLevel();
 });
 
 ////// Victoire /////////////////
