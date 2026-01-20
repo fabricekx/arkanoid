@@ -306,20 +306,32 @@ function updateBalls() {
 
 //  //////////////////////Étape 3 — Rebonds sur les murs /////////////////////////////////////
 function wallCollision() {
-  for (let i = balls.length - 1; i >= 0; i--) {
-    const ball = balls[i];
+  balls.forEach(ball => {
+    if (!ball.alive) return;
 
-    if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) {
-      ball.vx *= -1;
+    // Mur gauche
+    if (ball.x - ball.radius <= 0) {
+      ball.x = ball.radius;           // 🔑 reposition
+      ball.vx = Math.abs(ball.vx);    // vers la droite
       playSound(gameAudio.wall);
     }
 
-    if (ball.y < ball.radius) {
-      ball.vy *= -1;
+    // Mur droit
+    if (ball.x + ball.radius >= canvas.width) {
+      ball.x = canvas.width - ball.radius;
+      ball.vx = -Math.abs(ball.vx);   // vers la gauche
       playSound(gameAudio.wall);
     }
-  }
+
+    // Plafond
+    if (ball.y - ball.radius <= 0) {
+      ball.y = ball.radius;
+      ball.vy = Math.abs(ball.vy);
+      playSound(gameAudio.wall);
+    }
+  });
 }
+
 
 //////////////////   Étape 4 — La raquette ///////////////////////////////
 
