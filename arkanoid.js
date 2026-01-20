@@ -371,6 +371,25 @@ window.addEventListener("keydown", (e) => {
 
 let audioUnlocked = false;
 
+function unlockAudio() {
+  if (audioUnlocked) return;
+
+  Object.values(gameAudio).forEach(audio => {
+    audio.play()
+      .then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      })
+      .catch(() => {});
+  });
+
+  audioUnlocked = true;
+  console.log("Audio débloqué");
+};
+
+// / interaction universelle
+window.addEventListener("pointerdown", unlockAudio, { once: true });
+
 window.addEventListener(
   "keydown",
   () => {
@@ -615,11 +634,23 @@ function brickCollision() {
 
           const minX = Math.min(overlapLeft, overlapRight);
           const minY = Math.min(overlapTop, overlapBottom);
-          if (!ball.power) {
+           if (!ball.power) {
             if (minX < minY) {
+              // collision horizontale
               ball.vx *= -1;
+              if (overlapLeft < overlapRight) {
+                ball.x = b.x - ball.radius;
+              } else {
+                ball.x = b.x + brick.width + ball.radius;
+              }
             } else {
+              // collision verticale
               ball.vy *= -1;
+              if (overlapTop < overlapBottom) {
+                ball.y = b.y - ball.radius;
+              } else {
+                ball.y = b.y + brick.height + ball.radius;
+              }
             }
           }
           handleBrickHit(b);
@@ -801,8 +832,24 @@ window.addEventListener("keydown", (e) => {
 });
 
 document.getElementById("next-level-btn").addEventListener("click", () => {
-  if (checkVictory()) nextLevel();
+  if (checkVictory()) {nextLevel();
+ resetBallAndPaddle();
+    pause = false;
+  }
+  if ( lives <= 0) {
+    lives = 3;
+    score = 0;
+    levelIndex = 0;
+    createBricksFromLevel(levelIndex);
+    computeBrickSizeForLevel();
+    resetBallAndPaddle();
+    pause = false;}
 });
+
+
+
+ 
+
 
 ////// Victoire /////////////////
 function checkVictory() {
