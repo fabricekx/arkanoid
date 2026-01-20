@@ -31,37 +31,38 @@ const LEVELS = [
   // légende: n normal, s strong, i incassable, b bonus, . vide
   {
     rows: [
-      ["b", ".", "n", ".", "b"],
-      ["n", "b", "s", "b", "n"],
-      ["b", "n", "i", "n", "b"],
-      ["b", "b", "b", "b", "b"],
+      ["b", ".", "n", "n", ".", "b"],
+      ["n", "b", "s", "s", "b", "n"],
+      ["b", "n", "i", "i", "n", "b"],
+      ["b", "b", "b", "b", "b", "b"],
+      ["b", "b", "b", "b", "b", "b"],
     ],
   },
-  
-  
-  {
-    rows: [
-      ["i", "i", "i", "i", "i"],
-      ["i", "s", "b", "s", "i"],
-      ["i", "n", "b", "n", "i"],
-      ["i", "s", "b", "s", "i"],
-      ["i", "i", "b", "i", "i"],
-    ],
-  },
-  {
-    rows: [
-      ["n", "b", "s", "b", "n"],
-      [".", "s", "b", "s", "."],
-      [".", ".", "b", ".", "."],
-    ],
-  },
-  
 
   {
     rows: [
-      ["n", "n", "n", "n", "n"],
-      ["n", "s", "s", "s", "n"],
-      ["b", "n", "i", "n", "b"],
+      ["i", "i", "i", "i", "i", "i"],
+      ["i", "s", "b", "b", "s", "i"],
+      ["i", "n", "b", "b", "n", "i"],
+      ["i", "s", "b", "b", "s", "i"],
+      ["i", "i", "b", "b", "i", "i"],
+    ],
+  },
+  {
+    rows: [
+      ["n", "b", "s", "s", "b", "n"],
+      [".", "s", "b", "b", "s", "."],
+      [".", ".", "b", "b", ".", "."],
+      [".", ".", "s", "s", ".", "."],
+    ],
+  },
+
+  {
+    rows: [
+      ["n", "n", "n", "n", "n", "n"],
+      ["n", "s", "s", "s", "s", "n"],
+      [".", "i", ".", "i", ".", "i"],
+      ["b", "n", "i", "i", "n", "b"],
     ],
   },
 ];
@@ -77,12 +78,10 @@ const gameAudio = {
   metal: new Audio("sounds/metal.wav"),
   bonus: new Audio("sounds/bonus.wav"),
   bonus2: new Audio("sounds/bonus2.wav"),
-    extend: new Audio("sounds/extend.wav"),
-      power: new Audio("sounds/power.wav"),
+  extend: new Audio("sounds/extend.wav"),
+  power: new Audio("sounds/power.wav"),
   extralive: new Audio("sounds/extralive.wav"),
-    slow: new Audio("sounds/slow.wav"),
-
-
+  slow: new Audio("sounds/slow.wav"),
 };
 //////// CLASSe BONUS /////
 const bonuses = []; // tableau global pour stocker les bonus actifs
@@ -178,13 +177,20 @@ class Bonus {
         // optionnel : durée limitée
         setTimeout(() => {
           stickyBallActive = false;
-          
         }, 20000);
         break;
-        case "power":
-          balls.forEach((b)=>{b.power=true});
-          setTimeout(()=>balls.forEach((b)=>{b.power=false}),10000);
-          break;
+      case "power":
+        balls.forEach((b) => {
+          b.power = true;
+        });
+        setTimeout(
+          () =>
+            balls.forEach((b) => {
+              b.power = false;
+            }),
+          10000,
+        );
+        break;
     }
     playSound(gameAudio.bonus);
   }
@@ -213,7 +219,7 @@ function createBall() {
     vy: -3,
     alive: true,
     stuck: false, // 👈 balle collante
-    power : false, // balle traversante
+    power: false, // balle traversante
   };
 }
 
@@ -225,6 +231,9 @@ function drawBalls() {
     ctx.save();
     ctx.beginPath();
     ctx.fillStyle = "white";
+    ctx.shadowColor = "white";
+    ctx.shadowBlur = 10;
+
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
@@ -281,16 +290,14 @@ const paddle = {
 };
 
 function drawPaddle() {
-  ctx.fillStyle = "grey";
-  ctx.strokeStyle = "dark";
-  ctx.lineWidth = 5;
-  //  ctx.shadowColor = "lime";
-  //   ctx.shadowBlur = 15;
-  ctx.beginPath();
-  ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-  // ctx.strokeRect(paddle.x, paddle.y, paddle.width, paddle.height);
-  ctx.fill();
-  ctx.stroke();
+  ctx.save();
+  ctx.shadowColor = "#00ffff";
+  ctx.shadowBlur = 15;
+
+  ctx.fillStyle = "#aaa";
+  ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+  ctx.restore();
 }
 
 ///////// Étape 5 — Contrôle clavier / souris //////////////////
@@ -308,15 +315,18 @@ window.addEventListener("keydown", (e) => {
           ball.vy = -3;
         }
       });
-    } else {pause = !pause;
+    } else {
+      pause = !pause;
       balls.forEach((ball) => {
         if (ball.stuck) {
           ball.stuck = false;
           ball.vx = 3 * (Math.random() > 0.5 ? 1 : -1);
           ball.vy = -3;
-        } })
+        }
+      });
+    }
   }
-}});
+});
 
 window.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight") right = true;
@@ -384,10 +394,10 @@ function paddleCollisionAngle() {
       }
       // Calcul du point de contact relatif à la raquette
       const hitPoint = (ball.x - paddle.x) / paddle.width; // 0 = gauche, 0.5 = milieu ,1 = droite
-const clampedHit = Math.max(0, Math.min(1, hitPoint)); // sécurité
+      const clampedHit = Math.max(0, Math.min(1, hitPoint)); // sécurité
 
       // Angle maximal de rebond (par ex. 75°)
-const maxAngle = Math.PI / 3;
+      const maxAngle = Math.PI / 3;
 
       // Convertir hitPoint en angle
       const angle = (clampedHit - 0.5) * 2 * maxAngle;
@@ -417,23 +427,6 @@ brick.space = (canvas.width - canvas.width / 60) / (3 * brick.cols);
 brick.width = 2 * brick.space;
 const bricks = [];
 
-function createBricks() {
-  //// Remplacé par le createBricksFromLEvel
-  for (let c = 0; c < brick.cols; c++) {
-    bricks[c] = []; // tableau de tableau
-    for (let r = 0; r < brick.rows; r++) {
-      if (r == 1 && c == 0) {
-        bricks[c][r] = { x: 0, y: 0, alive: true, strong: 3, extra: 1 };
-      } else if (r == 2) {
-        bricks[c][r] = { x: 0, y: 0, alive: true, strong: 3, extra: 0 };
-      } else {
-        bricks[c][r] = { x: 0, y: 0, alive: true, strong: 1, extra: 0 };
-      } // on crée un abjet avec ces 3 propriétés
-    }
-  }
-}
-// createBricks();
-
 function brickFromCode(code) {
   switch (code) {
     case "n":
@@ -451,6 +444,16 @@ function brickFromCode(code) {
     default:
       return null;
   }
+}
+
+function computeBrickSizeForLevel() {
+  const maxCols = Math.max(...bricks.map((row) => row.length));
+
+  const maxGridWidth = canvas.width * 0.8; // 80% du canvas (très important)
+  const gap = 8;
+
+  brick.space = gap;
+  brick.width = (maxGridWidth - gap * (maxCols - 1)) / maxCols;
 }
 
 /////////// Remplace la fonction createBricks pour avoir des template basés sur LEVELS
@@ -478,6 +481,7 @@ function createBricksFromLevel(levelIndex) {
 }
 
 createBricksFromLevel(levelIndex);
+computeBrickSizeForLevel();
 
 // Dessin
 function drawBricks() {
@@ -488,28 +492,41 @@ function drawBricks() {
         bricks[r].length * brick.width + (bricks[r].length - 1) * brick.space; // calcul de la largeur de la rangée
       const offsetLeft = (canvas.width - rowWidth) / 2; // calcul des marges gauche et droite
 
-      if (!b || !b.alive) continue;
+      if (!b) continue;
 
       const x = offsetLeft + c * (brick.width + brick.space);
-      const y = r * (brick.height + brick.space / 3) + brick.offsetTop;
+      const y = r * (brick.height + brick.space / 2) + brick.offsetTop;
 
       b.x = x;
       b.y = y;
+
+       // ---- SHAKE ----
+      let shakeX = 0;
+      let shakeY = 0;
+      if (b.hitTime && b.hitTime > 0) {
+        shakeX = (Math.random() * 4 - 2); // ±2px
+        shakeY = (Math.random() * 4 - 2);
+        b.hitTime--;
+      }
+
       // couleur du remplissage selon la solidité
       if (b.strong === 3) ctx.fillStyle = "red";
       else if (b.strong === 2) ctx.fillStyle = "orange";
       else ctx.fillStyle = "green";
       if (b.type == "indestructible") ctx.fillStyle = "gray";
       // dessin du remplissage
-      ctx.fillRect(x, y, brick.width, brick.height);
 
+       // on dessine si alive OU si hitTime > 0 (shake encore visible)
+    if (b.alive || (b.hitTime && b.hitTime > 0)) {
+      ctx.fillRect(x + shakeX, y + shakeY, brick.width, brick.height);
+    
       // contour uniquement pour les briques "extra"
       if (b.type == "bonus") {
         ctx.strokeStyle = "blue";
 
         ctx.lineWidth = 3;
         ctx.strokeRect(x, y, brick.width, brick.height);
-      }
+      }}
     }
   }
 }
@@ -537,13 +554,13 @@ function brickCollision() {
 
           const minX = Math.min(overlapLeft, overlapRight);
           const minY = Math.min(overlapTop, overlapBottom);
-if (!ball.power) {
-          if (minX < minY) {
-            ball.vx *= -1;
-          } else {
-            ball.vy *= -1;
+          if (!ball.power) {
+            if (minX < minY) {
+              ball.vx *= -1;
+            } else {
+              ball.vy *= -1;
+            }
           }
-        }
           handleBrickHit(b);
           return; // 🔑 une seule collision par frame
         }
@@ -553,6 +570,8 @@ if (!ball.power) {
 }
 
 function handleBrickHit(b) {
+    b.hitTime = 5; // est utilisé lors du draw
+
   // brique indestructible
   if (b.type === "indestructible") {
     playSound(gameAudio.metal);
@@ -581,7 +600,7 @@ function spawnBonus(x, y) {
     "extraLife",
     "extraBall",
     "stickyBall",
-    "power"
+    "power",
   ];
   const type = types[Math.floor(Math.random() * types.length)];
   const bonus = new Bonus(x, y, type);
@@ -706,6 +725,7 @@ window.addEventListener("keydown", (e) => {
     score = 0;
     levelIndex = 0;
     createBricksFromLevel(levelIndex);
+    computeBrickSizeForLevel();
     resetBallAndPaddle();
     pause = false;
   }
@@ -750,6 +770,7 @@ function nextLevel() {
 
   bonuses.length = 0;
   createBricksFromLevel(levelIndex);
+  computeBrickSizeForLevel();
 }
 
 /////////////////////////  Étape finale — Game loop ////////////////////////////
