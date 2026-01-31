@@ -1,14 +1,20 @@
 // Étape 1 — Setup minimal
 const canvas = document.getElementById("game");
+const gameWrapper= document.getElementById("gameWrapper")
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
   //   canvas.width = 600;
   //   canvas.height = 400;
+
+  if (window.innerWidth>800) {canvas.style.width="500px"; gameWrapper.style.width="500px"; canvas.width =500 }
+  else {
   canvas.style.width = window.innerWidth * 0.8 + "px"; // pour le css
+  canvas.width = window.innerWidth * 0.8; // pour le canvas
+  }
+
   canvas.style.height = window.innerHeight * 0.8 + "px";
 
-  canvas.width = window.innerWidth * 0.8; // pour le canvas
   canvas.height = window.innerHeight * 0.8;
 
   // // repositionner le paddle au bas du canvas
@@ -29,6 +35,26 @@ resizeCanvas();
 //   ctx.fillRect(0,10,canvas.width,canvas.height); //top, left, width, height
 
 // Variables globale////
+// Local storage
+let highScore = localStorage.getItem("memoryHighScore");
+
+if (highScore === null) { // si pas de highScore
+  highScore = 0; // on lui donne la valeur infinie (puisque le meilleur score possible est petit)
+} else {
+  highScore = Number(highScore); // on transforme le string en nombre
+}
+  const spanHighScore= document.getElementById("highScore");
+     let highScoreStored = localStorage.getItem("memoryHighScore");
+
+spanHighScore.textContent=highScoreStored ;
+
+// reset HighScore
+document.getElementById("reset").addEventListener("click", ()=> {
+  localStorage.removeItem("memoryHighScore");
+      spanHighScore.textContent = highScoreStored;
+});
+
+
 let score = 0;
 let stickyBallActive = false;
 const paddle = {
@@ -62,22 +88,49 @@ instructions.addEventListener("click", () => {
 
 
 
-/////////////
+/////////////high score local Storage ////
+function setHighScore() {
+   if (score> highScoreStored) {
+      localStorage.setItem("memoryHighScore", score);
+
+ spanHighScore.textContent=score;
+   }
+
+}
 
 //// LEVELS ////
 
 let levelIndex = 0;
 const LEVELS = [
   // légende: n normal, s strong, i incassable, b bonus, . vide
-  {
+    {
     rows: [
-      ["b", ".", "n", "n", ".", "b"],
-      ["n", "b", "s", "s", "b", "n"],
-      ["b", "n", "i", "i", "n", "b"],
-      ["b", "b", "b", "b", "b", "b"],
-      ["b", "b", "b", "b", "b", "b"],
+      ["i", "n", "b",  "b", "n", "i"],
+      ["b", "i", "n",  "n", "i", "b"],
+      ["b", "b", "i",  "i", "b", "b"],
+      ["b", "i", "n",  "n", "i", "b"],
+      ["i", "n", "n",  "n","n", "i"],
     ],
   },
+  {
+    rows: [
+      ["i", "n", "n", "n", "n", "i"],
+      ["i", "b", "s", "s", "b", "i"],
+      ["s", "s", "s", "s", "s", "s"],
+      ["b", "b", "b", "b", "b", "b"],
+      ["i", "i", "i", "i", "i", "i"],
+    ],
+  },
+  {
+    rows: [
+      ["b", "b", "b",  "b", "i", "b"],
+      ["b", "i", "i",  "b", "i", "b"],
+      ["b", "b", "b",  "b", "b", "b"],
+      ["b", "i", "i",  "b", "i", "b"],
+      ["b", "i", "i",  "b","i", "b"],
+    ],
+  },
+  
 
   {
     rows: [
@@ -937,6 +990,7 @@ function gameLoop() {
     drawLives();
     ballLoosed();
     handleBonus();
+    setHighScore();
   }
 
   requestAnimationFrame(gameLoop);
